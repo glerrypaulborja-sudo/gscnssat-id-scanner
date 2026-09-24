@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1">
+
+  <title>GSCNSSAT ID Logging System</title>
+
+  <script
+    src="https://unpkg.com/html5-qrcode"
+    type="text/javascript">
+  </script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f1f3f4;
+      color: #202124;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 30px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 5px;
+      font-size: 38px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 20px;
+    }
+
+    .scanner-card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    }
+
+    #reader {
+      width: 100%;
+      max-width: 650px;
+      margin: auto;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .success {
+      color: #188038;
+    }
+
+    .error {
+      color: #d93025;
+    }
+
+    .info {
+      text-align: center;
+      font-size: 20px;
+      margin-top: 20px;
+    }
+
+    .button {
+      border: none;
+      border-radius: 8px;
+      padding: 14px 25px;
+      font-size: 18px;
+      cursor: pointer;
+      margin-top: 20px;
+      background: #1a73e8;
+      color: white;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+  <h1>GSCNSSAT ID LOGGING SYSTEM</h1>
+
+  <div class="subtitle">
+    Learner QR Scanner
+  </div>
+
+
+  <div class="scanner-card">
+
+    <!-- SCANNER -->
+
+    <div id="scannerSection">
+
+      <div id="status"
+           class="status">
+        READY TO SCAN
+      </div>
+
+      <div id="reader"></div>
+
+    </div>
+
+
+    <!-- SUCCESS -->
+
+    <div id="successSection"
+         class="hidden">
+
+      <div class="status success">
+        ✓ SCAN LOGGED
+      </div>
+
+      <div id="studentInfo"
+           class="info">
+      </div>
+
+      <div class="center">
+
+        <button
+          class="button"
+          onclick="startScanner()">
+
+          SCAN NEXT LEARNER
+
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ERROR -->
+
+    <div id="errorSection"
+         class="hidden">
+
+      <div class="status error">
+        ✕ ERROR
+      </div>
+
+      <div id="errorMessage"
+           class="info">
+      </div>
+
+      <div class="center">
+
+        <button
+          class="button"
+          onclick="startScanner()">
+
+          TRY AGAIN
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   APPS SCRIPT BACKEND
+   ===================================================== */
+
+const APPS_SCRIPT_URL =
+  "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+
+
+/* =====================================================
+   SCANNER
+   ===================================================== */
+
+let scanner = null;
+let scanning = false;
+
+
+/* =====================================================
+   START SCANNER
+   ===================================================== */
+
+function startScanner() {
+
+  document.getElementById("scannerSection")
+    .style.display = "block";
+
+  document.getElementById("successSection")
+    .classList.add("hidden");
+
+  document.getElementById("errorSection")
+    .classList.add("hidden");
+
+  document.getElementById("status")
+    .innerText = "STARTING CAMERA...";
+
+
+  if (scanner) {
+
+    try {
+      scanner.clear();
+    } catch (e) {}
+
+  }
+
+
+  scanner = new Html5Qrcode("reader");
+
+
+  Html5Qrcode.getCameras()
+
+    .then(function(devices) {
+
+      if (!devices || devices.length === 0) {
+
+        showError(
+          "No camera was detected."
+        );
+
+        return;
+
+      }
+
+
+      /*
+       * Use the first available camera.
+       * On the MacBook this should normally
+       * be the built-in FaceTime camera.
+       */
+
+      const cameraId = devices[0].id;
+
+
+      scanner.start(
+
+        cameraId,
+
+        {
+          fps: 10,
+
+          qrbox: {
+            width: 300,
+            height: 300
+          }
+        },
+
+        onScanSuccess,
+
+        onScanFailure
+
+      )
+
+      .then(function() {
+
+        scanning = true;
+
+        document.getElementById("status")
+          .innerText = "READY TO SCAN";
+
+      })
+
+      .catch(function(error) {
+
+        console.error(error);
+
+        showError(
+          "Camera detected, but the browser could not start it. " +
+          "Please allow camera access."
+        );
+
+      });
+
+    })
+
+    .catch(function(error) {
+
+      console.error(error);
+
+      showError(
+        "Unable to access the camera. " +
+        "Please check your browser camera permission."
+      );
+
+    });
+
+}
+
+
+/* =====================================================
+   QR SUCCESS
+   ===================================================== */
+
+function onScanSuccess(decodedText) {
+
+  if (!scanning) {
+    return;
+  }
+
+
+  scanning = false;
+
+
+  const lrn =
+    String(decodedText).trim();
+
+
+  console.log("QR:", lrn);
+
+
+  try {
+    scanner.stop();
+  } catch (e) {}
+
+
+  document.getElementById("status")
+    .innerText = "LOGGING...";
+
+
+  sendScan(lrn);
+
+}
+
+
+/* =====================================================
+   SEND SCAN TO APPS SCRIPT
+   ===================================================== */
+
+function sendScan(lrn) {
+
+  /*
+   * We use a normal HTML form POST.
+   *
+   * This avoids browser CORS problems when
+   * communicating with Google Apps Script.
+   */
+
+  const form =
+    document.createElement("form");
+
+  form.method = "POST";
+
+  form.action =
+    APPS_SCRIPT_URL;
+
+  form.target =
+    "hiddenFrame";
+
+
+  const lrnInput =
+    document.createElement("input");
+
+  lrnInput.type = "hidden";
+
+  lrnInput.name = "lrn";
+
+  lrnInput.value = lrn;
+
+
+  const stationInput =
+    document.createElement("input");
+
+  stationInput.type = "hidden";
+
+  stationInput.name = "station";
+
+  stationInput.value = "MAIN";
+
+
+  const logTypeInput =
+    document.createElement("input");
+
+  logTypeInput.type = "hidden";
+
+  logTypeInput.name = "logType";
+
+  logTypeInput.value = "SCAN";
+
+
+  form.appendChild(lrnInput);
+
+  form.appendChild(stationInput);
+
+  form.appendChild(logTypeInput);
+
+
+  document.body.appendChild(form);
+
+
+  form.submit();
+
+
+  form.remove();
+
+
+  /*
+   * We display success after sending
+   * the request to Apps Script.
+   */
+
+  showSuccess(lrn);
+
+}
+
+
+/* =====================================================
+   SHOW SUCCESS
+   ===================================================== */
+
+function showSuccess(lrn) {
+
+  document.getElementById("scannerSection")
+    .style.display = "none";
+
+  document.getElementById("errorSection")
+    .classList.add("hidden");
+
+  document.getElementById("successSection")
+    .classList.remove("hidden");
+
+
+  document.getElementById("studentInfo")
+    .innerHTML =
+      "<strong>LRN:</strong> " +
+      escapeHtml(lrn) +
+      "<br><br>" +
+      "The scan has been sent to the logging system.";
+
+}
+
+
+/* =====================================================
+   SHOW ERROR
+   ===================================================== */
+
+function showError(message) {
+
+  scanning = false;
+
+
+  try {
+
+    if (scanner) {
+      scanner.stop();
+    }
+
+  } catch (e) {}
+
+
+  document.getElementById("scannerSection")
+    .style.display = "none";
+
+  document.getElementById("successSection")
+    .classList.add("hidden");
+
+  document.getElementById("errorSection")
+    .classList.remove("hidden");
+
+
+  document.getElementById("errorMessage")
+    .innerText = message;
+
+}
+
+
+/* =====================================================
+   SCAN FAILURE
+   ===================================================== */
+
+function onScanFailure(error) {
+  // Intentionally empty.
+}
+
+
+/* =====================================================
+   HTML ESCAPE
+   ===================================================== */
+
+function escapeHtml(text) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+
+/* =====================================================
+   START
+   ===================================================== */
+
+window.onload = function() {
+
+  startScanner();
+
+};
+
+</script>
+
+
+<!--
+  Hidden target for the Apps Script POST.
+-->
+
+<iframe
+  name="hiddenFrame"
+  style="display:none;">
+</iframe>
+
+
+</body>
+
+</html>
