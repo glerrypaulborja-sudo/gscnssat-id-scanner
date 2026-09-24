@@ -1,6 +1,5 @@
-```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
 
@@ -8,22 +7,16 @@
 
   <meta
     name="viewport"
-    content="width=device-width, initial-scale=1.0">
+    content="width=device-width, initial-scale=1">
 
   <title>GSCNSSAT ID Logging System</title>
 
-  <!-- QR SCANNER LIBRARY -->
   <script
     src="https://unpkg.com/html5-qrcode"
     type="text/javascript">
   </script>
 
-
   <style>
-
-    /* =====================================================
-       GENERAL
-       ===================================================== */
 
     * {
       box-sizing: border-box;
@@ -37,63 +30,40 @@
     }
 
     .container {
-      width: 100%;
       max-width: 900px;
       margin: auto;
-      padding: 30px 20px;
+      padding: 30px;
     }
-
-
-    /* =====================================================
-       HEADER
-       ===================================================== */
 
     h1 {
       text-align: center;
-      margin: 0 0 5px 0;
-      font-size: 30px;
+      margin-bottom: 5px;
     }
 
     .subtitle {
       text-align: center;
       color: #666;
       margin-bottom: 25px;
-      font-size: 18px;
     }
-
-
-    /* =====================================================
-       MAIN CARD
-       ===================================================== */
 
     .scanner-card {
       background: white;
       border-radius: 16px;
       padding: 25px;
-      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 3px 12px rgba(0,0,0,0.12);
     }
-
-
-    /* =====================================================
-       SCANNER
-       ===================================================== */
 
     #reader {
       width: 100%;
       max-width: 650px;
-      margin: 0 auto;
+      margin: auto;
     }
-
-
-    /* =====================================================
-       STATUS
-       ===================================================== */
 
     .status {
       text-align: center;
       font-size: 24px;
       font-weight: bold;
-      margin: 10px 0 20px 0;
+      margin: 20px 0;
     }
 
     .success {
@@ -104,153 +74,51 @@
       color: #d93025;
     }
 
-
-    /* =====================================================
-       INFORMATION
-       ===================================================== */
-
     .info {
       text-align: center;
       font-size: 20px;
-      line-height: 1.6;
+      line-height: 1.7;
       margin-top: 20px;
     }
 
-
-    /* =====================================================
-       FULL QR DATA
-       ===================================================== */
-
-    .qr-label {
-      display: block;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-
     .qr-data {
-      display: block;
-      width: 100%;
+      margin-top: 10px;
       padding: 15px;
       background: #f1f3f4;
       border-radius: 8px;
-
-      /*
-       * Allows very long QR data to wrap
-       * instead of overflowing.
-       */
-      word-break: break-all;
-      overflow-wrap: anywhere;
-
+      word-break: break-word;
       text-align: left;
       font-size: 18px;
       line-height: 1.5;
     }
 
-
-    /* =====================================================
-       LRN
-       ===================================================== */
-
-    .lrn-label {
-      display: block;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-
     .lrn-data {
-      display: block;
-      width: 100%;
+      margin-top: 10px;
       padding: 15px;
-
       background: #e8f0fe;
       border-radius: 8px;
-
       font-size: 26px;
       font-weight: bold;
       letter-spacing: 1px;
-
-      text-align: center;
     }
-
-
-    /* =====================================================
-       BUTTON
-       ===================================================== */
 
     .button {
       border: none;
       border-radius: 8px;
-
       padding: 14px 25px;
-
       font-size: 18px;
-      font-weight: bold;
-
       cursor: pointer;
-
-      margin-top: 25px;
-
+      margin-top: 20px;
       background: #1a73e8;
       color: white;
     }
-
-    .button:hover {
-      background: #1557b0;
-    }
-
-
-    /* =====================================================
-       CENTER
-       ===================================================== */
 
     .center {
       text-align: center;
     }
 
-
-    /* =====================================================
-       HIDDEN
-       ===================================================== */
-
     .hidden {
-      display: none !important;
-    }
-
-
-    /* =====================================================
-       MOBILE
-       ===================================================== */
-
-    @media (max-width: 600px) {
-
-      .container {
-        padding: 15px;
-      }
-
-      .scanner-card {
-        padding: 15px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      .subtitle {
-        font-size: 16px;
-      }
-
-      .status {
-        font-size: 20px;
-      }
-
-      .info {
-        font-size: 18px;
-      }
-
-      .lrn-data {
-        font-size: 22px;
-      }
-
+      display: none;
     }
 
   </style>
@@ -260,783 +128,488 @@
 
 <body>
 
+<div class="container">
 
-  <!-- ===================================================
-       PAGE CONTAINER
-       =================================================== -->
+  <h1>GSCNSSAT ID LOGGING SYSTEM</h1>
 
-  <div class="container">
-
-
-    <!-- =================================================
-         HEADER
-         ================================================= -->
-
-    <h1>
-      GSCNSSAT ID LOGGING SYSTEM
-    </h1>
-
-    <div class="subtitle">
-      Learner QR Scanner
-    </div>
-
-
-    <!-- =================================================
-         MAIN CARD
-         ================================================= -->
-
-    <div class="scanner-card">
-
-
-      <!-- ===============================================
-           SCANNER SECTION
-           =============================================== -->
-
-      <div id="scannerSection">
-
-        <div
-          id="status"
-          class="status">
-
-          READY TO SCAN
-
-        </div>
-
-        <div id="reader"></div>
-
-      </div>
-
-
-      <!-- ===============================================
-           SUCCESS SECTION
-           =============================================== -->
-
-      <div
-        id="successSection"
-        class="hidden">
-
-        <div class="status success">
-
-          ✓ SCAN SUBMITTED
-
-        </div>
-
-
-        <div
-          id="studentInfo"
-          class="info">
-
-        </div>
-
-
-        <div class="center">
-
-          <button
-            type="button"
-            class="button"
-            onclick="startScanner()">
-
-            SCAN NEXT LEARNER
-
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <!-- ===============================================
-           ERROR SECTION
-           =============================================== -->
-
-      <div
-        id="errorSection"
-        class="hidden">
-
-        <div class="status error">
-
-          ✕ ERROR
-
-        </div>
-
-
-        <div
-          id="errorMessage"
-          class="info">
-
-        </div>
-
-
-        <div class="center">
-
-          <button
-            type="button"
-            class="button"
-            onclick="startScanner()">
-
-            TRY AGAIN
-
-          </button>
-
-        </div>
-
-      </div>
-
-
-    </div>
-
+  <div class="subtitle">
+    Learner QR Scanner
   </div>
 
 
-  <!-- ===================================================
-       HIDDEN IFRAME
+  <div class="scanner-card">
 
-       Apps Script POST response is loaded here so the
-       main page does not navigate away.
-       =================================================== -->
 
-  <iframe
-    name="hiddenFrame"
-    style="display:none;">
-  </iframe>
+    <!-- =================================================
+         SCANNER SECTION
+         ================================================= -->
 
+    <div id="scannerSection">
 
-  <script>
+      <div id="status" class="status">
+        READY TO SCAN
+      </div>
 
+      <div id="reader"></div>
 
-    /* ===================================================
-       APPS SCRIPT WEB APP URL
-       =================================================== */
+    </div>
 
-    const APPS_SCRIPT_URL =
-      "https://script.google.com/macros/s/AKfycbzfQo-pDnjCtEdQZDn4rVVURqT0h2-4GGzrjD0uLHvnGLgDihRTe4L1QNsvN-dU9OT/exec";
 
+    <!-- =================================================
+         SUCCESS SECTION
+         ================================================= -->
 
-    /* ===================================================
-       SCANNER VARIABLES
-       =================================================== */
+    <div id="successSection" class="hidden">
 
-    let scanner = null;
+      <div class="status success">
+        ✓ SCAN SUBMITTED
+      </div>
 
-    let scanning = false;
 
+      <div id="studentInfo" class="info">
+      </div>
 
-    /* ===================================================
-       START SCANNER
-       =================================================== */
 
-    async function startScanner() {
+      <div class="center">
 
-      /*
-       * Prevent multiple scanners from running.
-       */
+        <button
+          class="button"
+          onclick="startScanner()">
 
-      scanning = false;
+          SCAN NEXT LEARNER
 
+        </button>
 
-      /*
-       * Hide success and error sections.
-       */
+      </div>
 
-      document
-        .getElementById("successSection")
-        .classList.add("hidden");
+    </div>
 
-      document
-        .getElementById("errorSection")
-        .classList.add("hidden");
 
+    <!-- =================================================
+         ERROR SECTION
+         ================================================= -->
 
-      /*
-       * Show scanner.
-       */
+    <div id="errorSection" class="hidden">
 
-      document
-        .getElementById("scannerSection")
-        .style.display = "block";
+      <div class="status error">
+        ✕ ERROR
+      </div>
 
 
-      /*
-       * Update status.
-       */
+      <div id="errorMessage" class="info">
+      </div>
 
-      document
-        .getElementById("status")
-        .innerText = "READY TO SCAN";
 
+      <div class="center">
 
-      /*
-       * Stop previous scanner if one exists.
-       */
+        <button
+          class="button"
+          onclick="startScanner()">
 
-      if (scanner) {
+          TRY AGAIN
 
-        try {
+        </button>
 
-          await scanner.stop();
+      </div>
 
-        } catch (e) {
+    </div>
 
-          console.log(
-            "Previous scanner already stopped."
-          );
 
-        }
+  </div>
 
-        try {
+</div>
 
-          await scanner.clear();
 
-        } catch (e) {
+<script>
 
-          console.log(
-            "Scanner already cleared."
-          );
 
-        }
+/* =====================================================
+   APPS SCRIPT WEB APP URL
+   ===================================================== */
 
-      }
+const APPS_SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbzfQo-pDnjCtEdQZDn4rVVURqT0h2-4GGzrjJd0uLHvnGLgDihRTe4L1QNsvN-dU9OT/exec";
 
 
-      /*
-       * Create new scanner.
-       */
+/* =====================================================
+   SCANNER VARIABLES
+   ===================================================== */
 
-      scanner =
-        new Html5Qrcode("reader");
+let scanner = null;
 
+let scanning = false;
 
-      /*
-       * Scanner configuration.
-       */
 
-      const config = {
+/* =====================================================
+   START SCANNER
+   ===================================================== */
 
-        fps: 10,
+function handleQRCode(decodedText) {
 
-        qrbox: {
-          width: 300,
-          height: 300
-        },
+  if (!scanning) return;
 
-        aspectRatio: 1.0
+  scanning = false;
 
-      };
+  // COMPLETE QR DATA
+  const qrData = String(decodedText).trim();
 
+  console.log("FULL QR DATA:", qrData);
 
-      /*
-       * Start camera.
-       */
+  // ONLY FIRST FIELD = LRN
+  const lrn = qrData.split(",")[0].trim();
 
-      try {
+  console.log("LRN TO SEND:", lrn);
 
-        await scanner.start(
+  // Validate LRN
+  if (!/^\d{12}$/.test(lrn)) {
 
-          {
-            facingMode: "user"
-          },
-
-          config,
-
-          handleQRCode,
-
-          handleScanError
-
-        );
-
-        scanning = true;
-
-        document
-          .getElementById("status")
-          .innerText = "READY TO SCAN";
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Camera error:",
-          error
-        );
-
-        showError(
-          "Unable to start the camera.\n\n" +
-          "Please make sure:\n" +
-          "• Camera permission is allowed.\n" +
-          "• The webcam is connected.\n" +
-          "• No other application is using the camera."
-        );
-
-      }
-
-    }
-
-
-    /* ===================================================
-       QR SCAN ERROR CALLBACK
-
-       This runs continuously while the scanner is looking
-       for a QR code.
-
-       We intentionally do not display these errors because
-       they happen normally while searching for a QR code.
-       =================================================== */
-
-    function handleScanError(errorMessage) {
-
-      /*
-       * Do nothing.
-
-       html5-qrcode generates frequent scan errors when
-       there is no QR code visible.
-       */
-
-    }
-
-
-    /* ===================================================
-       QR CODE FOUND
-       =================================================== */
-
-    async function handleQRCode(decodedText) {
-
-
-      /*
-       * Prevent duplicate scans.
-       */
-
-      if (!scanning) {
-        return;
-      }
-
-
-      /*
-       * Immediately disable further scans.
-       */
-
-      scanning = false;
-
-
-      /*
-       * Convert QR result to string.
-       */
-
-      const qrData =
-        String(decodedText).trim();
-
-
-      console.log(
-        "FULL QR DATA:",
-        qrData
-      );
-
-
-      /*
-       * Extract first field.
-
-       Example QR:
-
-       123456789012,JUAN DELA CRUZ,01/01/2010
-
-       Result:
-
-       123456789012
-       */
-
-      const lrn =
-        qrData
-          .split(",")[0]
-          .trim();
-
-
-      console.log(
-        "LRN TO SEND:",
-        lrn
-      );
-
-
-      /* =================================================
-         VALIDATE LRN
-         ================================================= */
-
-      if (!/^\d{12}$/.test(lrn)) {
-
-        showError(
-
-          "Invalid QR code.\n\n" +
-
-          "FULL QR DATA:\n" +
-          qrData +
-
-          "\n\n" +
-
-          "EXTRACTED LRN:\n" +
-          lrn
-
-        );
-
-        return;
-
-      }
-
-
-      /* =================================================
-         STOP CAMERA
-         ================================================= */
-
-      try {
-
-        await scanner.stop();
-
-      }
-
-      catch (error) {
-
-        console.log(
-          "Scanner stop:",
-          error
-        );
-
-      }
-
-
-      /* =================================================
-         UPDATE STATUS
-         ================================================= */
-
-      document
-        .getElementById("status")
-        .innerText = "SUBMITTING...";
-
-
-      /* =================================================
-         SEND DATA
-         ================================================= */
-
-      sendScan(
-        lrn,
-        qrData
-      );
-
-    }
-
-
-    /* ===================================================
-       SEND SCAN TO APPS SCRIPT
-       =================================================== */
-
-    function sendScan(
-      lrn,
-      qrData
-    ) {
-
-
-      /*
-       * Create POST form.
-       */
-
-      const form =
-        document.createElement("form");
-
-
-      form.method = "POST";
-
-      form.action =
-        APPS_SCRIPT_URL;
-
-      form.target =
-        "hiddenFrame";
-
-
-      /* =================================================
-         LRN
-         ================================================= */
-
-      const lrnInput =
-        document.createElement("input");
-
-      lrnInput.type = "hidden";
-
-      lrnInput.name = "lrn";
-
-      lrnInput.value = lrn;
-
-
-      /* =================================================
-         STATION
-         ================================================= */
-
-      const stationInput =
-        document.createElement("input");
-
-      stationInput.type = "hidden";
-
-      stationInput.name = "station";
-
-      stationInput.value = "MAIN";
-
-
-      /* =================================================
-         LOG TYPE
-         ================================================= */
-
-      const logTypeInput =
-        document.createElement("input");
-
-      logTypeInput.type = "hidden";
-
-      logTypeInput.name = "logType";
-
-      logTypeInput.value = "SCAN";
-
-
-      /* =================================================
-         ADD INPUTS
-         ================================================= */
-
-      form.appendChild(
-        lrnInput
-      );
-
-      form.appendChild(
-        stationInput
-      );
-
-      form.appendChild(
-        logTypeInput
-      );
-
-
-      /* =================================================
-         SUBMIT FORM
-         ================================================= */
-
-      document.body.appendChild(
-        form
-      );
-
-      form.submit();
-
-      form.remove();
-
-
-      /* =================================================
-         DISPLAY SUCCESS
-
-         The display uses qrData, not lrn.
-
-         This means the complete QR content will appear.
-         ================================================= */
-
-      showSuccess(
-        qrData,
-        lrn
-      );
-
-    }
-
-
-    /* ===================================================
-       SHOW SUCCESS
-       =================================================== */
-
-    function showSuccess(
-      qrData,
+    showError(
+      "Invalid QR code.\n\n" +
+      "FULL QR DATA:\n" +
+      qrData +
+      "\n\n" +
+      "EXTRACTED LRN:\n" +
       lrn
-    ) {
+    );
+
+    return;
+  }
+
+  // Stop camera
+  try {
+    scanner.stop();
+  } catch (e) {}
+
+  document.getElementById("status").innerText =
+    "SUBMITTING...";
+
+  // IMPORTANT:
+  // FULL QR DATA first
+  // LRN second
+  sendScan(lrn, qrData);
+}
 
 
-      /*
-       * Hide scanner.
-       */
+/* =====================================================
+   SEND SCAN TO APPS SCRIPT
+   ===================================================== */
 
-      document
-        .getElementById("scannerSection")
-        .style.display = "none";
+function sendScan(lrn, qrData) {
 
+  const form = document.createElement("form");
 
-      /*
-       * Hide error.
-       */
+  form.method = "POST";
+  form.action = APPS_SCRIPT_URL;
+  form.target = "hiddenFrame";
 
-      document
-        .getElementById("errorSection")
-        .classList.add("hidden");
+  // ==========================================
+  // SEND ONLY LRN
+  // ==========================================
 
+  const lrnInput =
+    document.createElement("input");
 
-      /*
-       * Show success.
-       */
+  lrnInput.type = "hidden";
+  lrnInput.name = "lrn";
 
-      document
-        .getElementById("successSection")
-        .classList.remove("hidden");
-
-
-      /*
-       * Build success information.
-
-       * IMPORTANT:
-       * FULL QR DATA and the actual data are placed
-       * inside separate block elements.
-       */
-
-      document
-        .getElementById("studentInfo")
-        .innerHTML =
-
-          "<div>" +
-
-            "<strong class=\"qr-label\">" +
-              "FULL QR DATA:" +
-            "</strong>" +
-
-            "<div class=\"qr-data\">" +
-              escapeHtml(qrData) +
-            "</div>" +
-
-          "</div>" +
+  // IMPORTANT:
+  // Only the 12-digit LRN goes to Apps Script.
+  lrnInput.value = lrn;
 
 
-          "<div style=\"margin-top:25px;\">" +
+  // ==========================================
+  // STATION
+  // ==========================================
 
-            "<strong class=\"lrn-label\">" +
-              "LRN SENT TO LOG:" +
-            "</strong>" +
+  const stationInput =
+    document.createElement("input");
 
-            "<div class=\"lrn-data\">" +
-              escapeHtml(lrn) +
-            "</div>" +
-
-          "</div>" +
+  stationInput.type = "hidden";
+  stationInput.name = "station";
+  stationInput.value = "MAIN";
 
 
-          "<div style=\"margin-top:20px;\">" +
+  // ==========================================
+  // LOG TYPE
+  // ==========================================
 
-            "The LRN has been submitted to the logging system." +
+  const logTypeInput =
+    document.createElement("input");
 
-          "</div>";
+  logTypeInput.type = "hidden";
+  logTypeInput.name = "logType";
+  logTypeInput.value = "SCAN";
+
+
+  // ==========================================
+  // ADD INPUTS
+  // ==========================================
+
+  form.appendChild(lrnInput);
+  form.appendChild(stationInput);
+  form.appendChild(logTypeInput);
+
+
+  // ==========================================
+  // SUBMIT
+  // ==========================================
+
+  document.body.appendChild(form);
+
+  form.submit();
+
+  form.remove();
+
+
+  // ==========================================
+  // DISPLAY
+  // ==========================================
+
+  showSuccess(
+    qrData,
+    lrn
+  );
+}
+
+
+/* =====================================================
+   SHOW SUCCESS
+   ===================================================== */
+
+function showSuccess(qrData, lrn) {
+
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "errorSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "successSection"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "studentInfo"
+  ).innerHTML =
+
+    /*
+     * FULL QR DATA
+     */
+
+    "<strong>FULL QR DATA:</strong>" +
+
+    "<div class=\"qr-data\">" +
+
+    escapeHtml(qrData) +
+
+    "</div>" +
+
+
+    "<br><br>" +
+
+
+    /*
+     * LRN
+     */
+
+    "<strong>LRN SENT TO LOG:</strong>" +
+
+    "<div class=\"lrn-data\">" +
+
+    escapeHtml(lrn) +
+
+    "</div>" +
+
+
+    "<br>" +
+
+    "The LRN has been submitted to the logging system.";
+
+}function showSuccess(qrData, lrn) {
+
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "errorSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "successSection"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "studentInfo"
+  ).innerHTML =
+
+    /*
+     * FULL QR DATA
+     */
+
+    "<strong>FULL QR DATA:</strong>" +
+
+    "<div class=\"qr-data\">" +
+
+    escapeHtml(qrData) +
+
+    "</div>" +
+
+
+    "<br><br>" +
+
+
+    /*
+     * LRN
+     */
+
+    "<strong>LRN SENT TO LOG:</strong>" +
+
+    "<div class=\"lrn-data\">" +
+
+    escapeHtml(lrn) +
+
+    "</div>" +
+
+
+    "<br>" +
+
+    "The LRN has been submitted to the logging system.";
+
+}
+
+
+/* =====================================================
+   SHOW ERROR
+   ===================================================== */
+
+function showError(
+  message
+) {
+
+
+  /*
+   * Stop scanning.
+   */
+
+  scanning = false;
+
+
+  /*
+   * Stop camera.
+   */
+
+  try {
+
+    if (scanner) {
+
+      scanner.stop();
 
     }
 
-
-    /* ===================================================
-       SHOW ERROR
-       =================================================== */
-
-    async function showError(
-      message
-    ) {
+  } catch (e) {}
 
 
-      /*
-       * Stop scanning.
-       */
+  /*
+   * Hide scanner.
+   */
 
-      scanning = false;
-
-
-      /*
-       * Stop camera.
-       */
-
-      if (scanner) {
-
-        try {
-
-          await scanner.stop();
-
-        }
-
-        catch (e) {
-
-          console.log(
-            "Scanner stop:",
-            e
-          );
-
-        }
-
-      }
+  document.getElementById(
+    "scannerSection"
+  ).style.display =
+    "none";
 
 
-      /*
-       * Hide scanner.
-       */
+  /*
+   * Hide success.
+   */
 
-      document
-        .getElementById("scannerSection")
-        .style.display = "none";
-
-
-      /*
-       * Hide success.
-       */
-
-      document
-        .getElementById("successSection")
-        .classList.add("hidden");
+  document.getElementById(
+    "successSection"
+  ).classList.add(
+    "hidden"
+  );
 
 
-      /*
-       * Show error.
-       */
+  /*
+   * Show error.
+   */
 
-      document
-        .getElementById("errorSection")
-        .classList.remove("hidden");
-
-
-      /*
-       * Display error.
-       */
-
-      document
-        .getElementById("errorMessage")
-        .innerText = message;
-
-    }
+  document.getElementById(
+    "errorSection"
+  ).classList.remove(
+    "hidden"
+  );
 
 
-    /* ===================================================
-       ESCAPE HTML
-       =================================================== */
+  /*
+   * Display error message.
+   */
 
-    function escapeHtml(
-      text
-    ) {
+  document.getElementById(
+    "errorMessage"
+  ).innerText =
+    message;
 
-      const div =
-        document.createElement("div");
-
-
-      div.textContent =
-        String(text);
+}
 
 
-      return div.innerHTML;
+/* =====================================================
+   ESCAPE HTML
+   ===================================================== */
 
-    }
+function escapeHtml(
+  text
+) {
 
-
-    /* ===================================================
-       START WHEN PAGE LOADS
-       =================================================== */
-
-    window.addEventListener(
-      "load",
-      function() {
-
-        startScanner();
-
-      }
+  const div =
+    document.createElement(
+      "div"
     );
 
 
-  </script>
+  div.textContent =
+    text;
+
+
+  return div.innerHTML;
+
+}
+
+
+/* =====================================================
+   START SCANNER WHEN PAGE LOADS
+   ===================================================== */
+
+window.onload =
+  function() {
+
+    startScanner();
+
+  };
+
+
+</script>
+
+
+<!-- ===================================================
+     HIDDEN IFRAME
+     =================================================== -->
+
+<iframe
+  name="hiddenFrame"
+  style="display:none;">
+</iframe>
 
 
 </body>
 
 </html>
-```
