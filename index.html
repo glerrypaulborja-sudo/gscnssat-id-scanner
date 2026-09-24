@@ -81,6 +81,27 @@
       margin-top: 20px;
     }
 
+    .qr-data {
+      margin-top: 10px;
+      padding: 15px;
+      background: #f1f3f4;
+      border-radius: 8px;
+      word-break: break-word;
+      text-align: left;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .lrn-data {
+      margin-top: 10px;
+      padding: 15px;
+      background: #e8f0fe;
+      border-radius: 8px;
+      font-size: 26px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
     .button {
       border: none;
       border-radius: 8px;
@@ -118,7 +139,10 @@
 
   <div class="scanner-card">
 
-    <!-- SCANNER -->
+
+    <!-- =================================================
+         SCANNER SECTION
+         ================================================= -->
 
     <div id="scannerSection">
 
@@ -131,16 +155,20 @@
     </div>
 
 
-    <!-- SUCCESS -->
+    <!-- =================================================
+         SUCCESS SECTION
+         ================================================= -->
 
     <div id="successSection" class="hidden">
 
       <div class="status success">
-        ✓ SCAN LOGGED
+        ✓ SCAN SUBMITTED
       </div>
+
 
       <div id="studentInfo" class="info">
       </div>
+
 
       <div class="center">
 
@@ -157,7 +185,9 @@
     </div>
 
 
-    <!-- ERROR -->
+    <!-- =================================================
+         ERROR SECTION
+         ================================================= -->
 
     <div id="errorSection" class="hidden">
 
@@ -165,8 +195,10 @@
         ✕ ERROR
       </div>
 
+
       <div id="errorMessage" class="info">
       </div>
+
 
       <div class="center">
 
@@ -182,6 +214,7 @@
 
     </div>
 
+
   </div>
 
 </div>
@@ -191,7 +224,7 @@
 
 
 /* =====================================================
-   APPS SCRIPT URL
+   APPS SCRIPT WEB APP URL
    ===================================================== */
 
 const APPS_SCRIPT_URL =
@@ -213,25 +246,46 @@ let scanning = false;
 
 function startScanner() {
 
+  /*
+   * Show scanner
+   */
+
   document.getElementById(
     "scannerSection"
   ).style.display = "block";
 
+
+  /*
+   * Hide success
+   */
 
   document.getElementById(
     "successSection"
   ).classList.add("hidden");
 
 
+  /*
+   * Hide error
+   */
+
   document.getElementById(
     "errorSection"
   ).classList.add("hidden");
 
 
+  /*
+   * Update status
+   */
+
   document.getElementById(
     "status"
-  ).innerText = "STARTING CAMERA...";
+  ).innerText =
+    "STARTING CAMERA...";
 
+
+  /*
+   * Clear previous scanner
+   */
 
   if (scanner) {
 
@@ -244,13 +298,26 @@ function startScanner() {
   }
 
 
+  /*
+   * Create new scanner
+   */
+
   scanner =
     new Html5Qrcode("reader");
 
 
+  /*
+   * Get available cameras
+   */
+
   Html5Qrcode.getCameras()
 
     .then(function(devices) {
+
+
+      /*
+       * No camera
+       */
 
       if (
         !devices ||
@@ -267,12 +334,16 @@ function startScanner() {
 
 
       /*
-       * Use the first available camera.
+       * Use first camera
        */
 
       const cameraId =
         devices[0].id;
 
+
+      /*
+       * Start camera
+       */
 
       scanner.start(
 
@@ -290,7 +361,12 @@ function startScanner() {
         handleQRCode,
 
         function(error) {
-          // Ignore normal scanning failures
+
+          /*
+           * Ignore normal
+           * QR scanning errors.
+           */
+
         }
 
       )
@@ -336,69 +412,185 @@ function startScanner() {
    ===================================================== */
 
 function handleQRCode(decodedText) {
+
+  /*
+   * Prevent multiple scans.
+   */
+
   if (!scanning) return;
 
   scanning = false;
 
-  // KEEP THE ENTIRE QR DATA
-  const qrData = String(decodedText).trim();
 
-  console.log("FULL QR DATA:", qrData);
+  /*
+   * IMPORTANT:
+   *
+   * Keep the COMPLETE QR DATA.
+   */
 
-  // ONLY EXTRACT THE FIRST CSV FIELD FOR THE LRN
-  const lrn = qrData.split(",")[0].trim();
+  const qrData =
+    String(decodedText).trim();
 
-  console.log("LRN TO SEND:", lrn);
+
+  /*
+   * Debug information.
+   */
+
+  console.log(
+    "================================"
+  );
+
+  console.log(
+    "FULL QR DATA:"
+  );
+
+  console.log(qrData);
+
+
+  /*
+   * Extract ONLY the first
+   * CSV field.
+   *
+   * Example:
+   *
+   * 131000000000,
+   * HEZZEIL MAE A. BAGCAL,
+   * May 31,
+   * 2013.
+   *
+   * becomes:
+   *
+   * 131000000000
+   */
+
+  const lrn =
+    qrData.split(",")[0].trim();
+
+
+  console.log(
+    "LRN TO SEND:"
+  );
+
+  console.log(lrn);
+
+  console.log(
+    "================================"
+  );
+
+
+  /*
+   * Validate LRN.
+   */
 
   if (!/^\d{12}$/.test(lrn)) {
+
     showError(
+
       "Invalid QR code.\n\n" +
-      "Full QR data:\n" +
+
+      "FULL QR DATA:\n" +
+
       qrData +
+
       "\n\n" +
-      "Extracted LRN:\n" +
-      lrn
+
+      "EXTRACTED LRN:\n" +
+
+      lrn +
+
+      "\n\n" +
+
+      "Expected a 12-digit LRN."
+
     );
+
     return;
+
   }
 
+
+  /*
+   * Stop camera.
+   */
+
   try {
+
     scanner.stop();
+
   } catch (e) {}
 
-  sendScan(lrn, qrData);
+
+  /*
+   * Update status.
+   */
+
+  document.getElementById(
+    "status"
+  ).innerText =
+    "SUBMITTING...";
+
+
+  /*
+   * Send ONLY the LRN
+   * to Apps Script.
+   *
+   * The complete QR data
+   * is kept locally for display.
+   */
+
+  sendScan(
+    lrn,
+    qrData
+  );
+
 }
 
+
 /* =====================================================
-   SEND SCAN
+   SEND SCAN TO APPS SCRIPT
    ===================================================== */
 
-function sendScan(lrn) {
+function sendScan(
+  lrn,
+  qrData
+) {
+
 
   /*
    * Create hidden form.
    *
-   * This avoids CORS problems.
+   * This method avoids
+   * browser CORS problems.
    */
 
   const form =
     document.createElement("form");
 
 
-  form.method = "POST";
+  /*
+   * POST request.
+   */
+
+  form.method =
+    "POST";
 
 
   form.action =
     APPS_SCRIPT_URL;
 
 
+  /*
+   * Send response to
+   * hidden iframe.
+   */
+
   form.target =
     "hiddenFrame";
 
 
-  /*
-   * LRN
-   */
+  /* ===================================================
+     LRN
+     =================================================== */
 
   const lrnInput =
     document.createElement("input");
@@ -412,13 +604,19 @@ function sendScan(lrn) {
     "lrn";
 
 
+  /*
+   * IMPORTANT:
+   *
+   * Only the LRN is sent.
+   */
+
   lrnInput.value =
     lrn;
 
 
-  /*
-   * Station
-   */
+  /* ===================================================
+     STATION
+     =================================================== */
 
   const stationInput =
     document.createElement("input");
@@ -436,9 +634,9 @@ function sendScan(lrn) {
     "MAIN";
 
 
-  /*
-   * Log type
-   */
+  /* ===================================================
+     LOG TYPE
+     =================================================== */
 
   const logTypeInput =
     document.createElement("input");
@@ -456,9 +654,9 @@ function sendScan(lrn) {
     "SCAN";
 
 
-  /*
-   * Add inputs.
-   */
+  /* ===================================================
+     ADD INPUTS
+     =================================================== */
 
   form.appendChild(
     lrnInput
@@ -475,38 +673,35 @@ function sendScan(lrn) {
   );
 
 
-  /*
-   * Add form to page.
-   */
+  /* ===================================================
+     SUBMIT FORM
+     =================================================== */
 
   document.body.appendChild(
     form
   );
 
 
-  /*
-   * Submit.
-   */
-
   form.submit();
 
 
   /*
-   * Remove form.
+   * Remove form after
+   * submission.
    */
 
   form.remove();
 
 
   /*
-   * Show result.
-   *
-   * We will improve this later
-   * to wait for Apps Script's
-   * actual response.
+   * Display complete QR
+   * and extracted LRN.
    */
 
-  showSuccess(lrn);
+  showSuccess(
+    lrn,
+    qrData
+  );
 
 }
 
@@ -515,33 +710,88 @@ function sendScan(lrn) {
    SHOW SUCCESS
    ===================================================== */
 
-function showSuccess(lrn) {
+function showSuccess(
+  lrn,
+  qrData
+) {
+
+
+  /*
+   * Hide scanner.
+   */
 
   document.getElementById(
     "scannerSection"
-  ).style.display = "none";
+  ).style.display =
+    "none";
 
+
+  /*
+   * Hide error.
+   */
 
   document.getElementById(
     "errorSection"
-  ).classList.add("hidden");
+  ).classList.add(
+    "hidden"
+  );
 
+
+  /*
+   * Show success.
+   */
 
   document.getElementById(
     "successSection"
-  ).classList.remove("hidden");
+  ).classList.remove(
+    "hidden"
+  );
 
+
+  /*
+   * Display FULL QR DATA
+   *
+   * This is the complete
+   * information decoded from
+   * the QR code.
+   */
 
   document.getElementById(
     "studentInfo"
   ).innerHTML =
 
-    "<strong>LRN:</strong> " +
-    escapeHtml(lrn) +
 
-    "<br><br>" +
+    "<strong>FULL QR DATA:</strong>" +
 
-    "The scan has been sent to the logging system.";
+
+    "<div class=\"qr-data\">" +
+
+    escapeHtml(
+      qrData
+    ) +
+
+    "</div>" +
+
+
+    "<br>" +
+
+
+    "<strong>LRN SENT TO LOG:</strong>" +
+
+
+    "<div class=\"lrn-data\">" +
+
+    escapeHtml(
+      lrn
+    ) +
+
+    "</div>" +
+
+
+    "<br>" +
+
+
+    "The LRN has been submitted to the logging system.";
 
 }
 
@@ -550,10 +800,21 @@ function showSuccess(lrn) {
    SHOW ERROR
    ===================================================== */
 
-function showError(message) {
+function showError(
+  message
+) {
+
+
+  /*
+   * Stop scanning.
+   */
 
   scanning = false;
 
+
+  /*
+   * Stop camera.
+   */
 
   try {
 
@@ -566,20 +827,41 @@ function showError(message) {
   } catch (e) {}
 
 
+  /*
+   * Hide scanner.
+   */
+
   document.getElementById(
     "scannerSection"
-  ).style.display = "none";
+  ).style.display =
+    "none";
 
+
+  /*
+   * Hide success.
+   */
 
   document.getElementById(
     "successSection"
-  ).classList.add("hidden");
+  ).classList.add(
+    "hidden"
+  );
 
+
+  /*
+   * Show error.
+   */
 
   document.getElementById(
     "errorSection"
-  ).classList.remove("hidden");
+  ).classList.remove(
+    "hidden"
+  );
 
+
+  /*
+   * Display error message.
+   */
 
   document.getElementById(
     "errorMessage"
@@ -593,10 +875,14 @@ function showError(message) {
    ESCAPE HTML
    ===================================================== */
 
-function escapeHtml(text) {
+function escapeHtml(
+  text
+) {
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
 
   div.textContent =
@@ -609,7 +895,7 @@ function escapeHtml(text) {
 
 
 /* =====================================================
-   START WHEN PAGE LOADS
+   START SCANNER WHEN PAGE LOADS
    ===================================================== */
 
 window.onload =
@@ -623,10 +909,9 @@ window.onload =
 </script>
 
 
-<!--
-  Hidden target used by the
-  Apps Script POST request.
--->
+<!-- ===================================================
+     HIDDEN IFRAME
+     =================================================== -->
 
 <iframe
   name="hiddenFrame"
