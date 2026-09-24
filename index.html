@@ -330,15 +330,50 @@ function onScanSuccess(decodedText) {
     return;
   }
 
-
   scanning = false;
 
 
-  const lrn =
+  /*
+   * QR contains CSV data:
+   *
+   * 131000000000,HEZZEIL MAE A. BAGCAL,May 31, 2013.
+   *
+   * We only need the first field:
+   *
+   * 131000000000
+   */
+
+  const qrData =
     String(decodedText).trim();
 
 
-  console.log("QR:", lrn);
+  const fields =
+    qrData.split(",");
+
+
+  const lrn =
+    String(fields[0] || "").trim();
+
+
+  console.log("Full QR:", qrData);
+
+  console.log("Extracted LRN:", lrn);
+
+
+  /*
+   * Make sure the extracted value
+   * looks like an LRN.
+   */
+
+  if (!/^\d{12}$/.test(lrn)) {
+
+    showError(
+      "Invalid QR code. The first field must contain a 12-digit LRN."
+    );
+
+    return;
+
+  }
 
 
   try {
