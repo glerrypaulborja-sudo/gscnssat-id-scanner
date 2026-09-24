@@ -244,305 +244,49 @@ let scanning = false;
    START SCANNER
    ===================================================== */
 
-function startScanner() {
-
-  /*
-   * Show scanner
-   */
-
-  document.getElementById(
-    "scannerSection"
-  ).style.display = "block";
-
-
-  /*
-   * Hide success
-   */
-
-  document.getElementById(
-    "successSection"
-  ).classList.add("hidden");
-
-
-  /*
-   * Hide error
-   */
-
-  document.getElementById(
-    "errorSection"
-  ).classList.add("hidden");
-
-
-  /*
-   * Update status
-   */
-
-  document.getElementById(
-    "status"
-  ).innerText =
-    "STARTING CAMERA...";
-
-
-  /*
-   * Clear previous scanner
-   */
-
-  if (scanner) {
-
-    try {
-
-      scanner.clear();
-
-    } catch (e) {}
-
-  }
-
-
-  /*
-   * Create new scanner
-   */
-
-  scanner =
-    new Html5Qrcode("reader");
-
-
-  /*
-   * Get available cameras
-   */
-
-  Html5Qrcode.getCameras()
-
-    .then(function(devices) {
-
-
-      /*
-       * No camera
-       */
-
-      if (
-        !devices ||
-        devices.length === 0
-      ) {
-
-        showError(
-          "No camera was detected."
-        );
-
-        return;
-
-      }
-
-
-      /*
-       * Use first camera
-       */
-
-      const cameraId =
-        devices[0].id;
-
-
-      /*
-       * Start camera
-       */
-
-      scanner.start(
-
-        cameraId,
-
-        {
-          fps: 10,
-
-          qrbox: {
-            width: 300,
-            height: 300
-          }
-        },
-
-        handleQRCode,
-
-        function(error) {
-
-          /*
-           * Ignore normal
-           * QR scanning errors.
-           */
-
-        }
-
-      )
-
-      .then(function() {
-
-        scanning = true;
-
-        document.getElementById(
-          "status"
-        ).innerText =
-          "READY TO SCAN";
-
-      })
-
-      .catch(function(error) {
-
-        console.error(error);
-
-        showError(
-          "Camera detected, but the browser could not start it."
-        );
-
-      });
-
-    })
-
-    .catch(function(error) {
-
-      console.error(error);
-
-      showError(
-        "Unable to access the camera."
-      );
-
-    });
-
-}
-
-
-/* =====================================================
-   QR CODE HANDLER
-   ===================================================== */
-
 function handleQRCode(decodedText) {
-
-  /*
-   * Prevent multiple scans.
-   */
 
   if (!scanning) return;
 
   scanning = false;
 
+  // COMPLETE QR DATA
+  const qrData = String(decodedText).trim();
 
-  /*
-   * IMPORTANT:
-   *
-   * Keep the COMPLETE QR DATA.
-   */
+  console.log("FULL QR DATA:", qrData);
 
-  const qrData =
-    String(decodedText).trim();
+  // ONLY FIRST FIELD = LRN
+  const lrn = qrData.split(",")[0].trim();
 
+  console.log("LRN TO SEND:", lrn);
 
-  /*
-   * Debug information.
-   */
-
-  console.log(
-    "================================"
-  );
-
-  console.log(
-    "FULL QR DATA:"
-  );
-
-  console.log(qrData);
-
-
-  /*
-   * Extract ONLY the first
-   * CSV field.
-   *
-   * Example:
-   *
-   * 131000000000,
-   * HEZZEIL MAE A. BAGCAL,
-   * May 31,
-   * 2013.
-   *
-   * becomes:
-   *
-   * 131000000000
-   */
-
-  const lrn =
-    qrData.split(",")[0].trim();
-
-
-  console.log(
-    "LRN TO SEND:"
-  );
-
-  console.log(lrn);
-
-  console.log(
-    "================================"
-  );
-
-
-  /*
-   * Validate LRN.
-   */
-
+  // Validate LRN
   if (!/^\d{12}$/.test(lrn)) {
 
     showError(
-
       "Invalid QR code.\n\n" +
-
       "FULL QR DATA:\n" +
-
       qrData +
-
       "\n\n" +
-
       "EXTRACTED LRN:\n" +
-
-      lrn +
-
-      "\n\n" +
-
-      "Expected a 12-digit LRN."
-
+      lrn
     );
 
     return;
-
   }
 
-
-  /*
-   * Stop camera.
-   */
-
+  // Stop camera
   try {
-
     scanner.stop();
-
   } catch (e) {}
 
-
-  /*
-   * Update status.
-   */
-
-  document.getElementById(
-    "status"
-  ).innerText =
+  document.getElementById("status").innerText =
     "SUBMITTING...";
 
-
-  /*
-   * Send ONLY the LRN
-   * to Apps Script.
-   *
-   * The complete QR data
-   * is kept locally for display.
-   */
-
-  sendScan(
-    lrn,
-    qrData
-  );
-
+  // IMPORTANT:
+  // FULL QR DATA first
+  // LRN second
+  sendScan(lrn, qrData);
 }
 
 
@@ -550,158 +294,81 @@ function handleQRCode(decodedText) {
    SEND SCAN TO APPS SCRIPT
    ===================================================== */
 
-function sendScan(
-  lrn,
-  qrData
-) {
+function sendScan(lrn, qrData) {
 
+  const form = document.createElement("form");
 
-  /*
-   * Create hidden form.
-   *
-   * This method avoids
-   * browser CORS problems.
-   */
+  form.method = "POST";
+  form.action = APPS_SCRIPT_URL;
+  form.target = "hiddenFrame";
 
-  const form =
-    document.createElement("form");
-
-
-  /*
-   * POST request.
-   */
-
-  form.method =
-    "POST";
-
-
-  form.action =
-    APPS_SCRIPT_URL;
-
-
-  /*
-   * Send response to
-   * hidden iframe.
-   */
-
-  form.target =
-    "hiddenFrame";
-
-
-  /* ===================================================
-     LRN
-     =================================================== */
+  // ==========================================
+  // SEND ONLY LRN
+  // ==========================================
 
   const lrnInput =
     document.createElement("input");
 
+  lrnInput.type = "hidden";
+  lrnInput.name = "lrn";
 
-  lrnInput.type =
-    "hidden";
-
-
-  lrnInput.name =
-    "lrn";
-
-
-  /*
-   * IMPORTANT:
-   *
-   * Only the LRN is sent.
-   */
-
-  lrnInput.value =
-    lrn;
+  // IMPORTANT:
+  // Only the 12-digit LRN goes to Apps Script.
+  lrnInput.value = lrn;
 
 
-  /* ===================================================
-     STATION
-     =================================================== */
+  // ==========================================
+  // STATION
+  // ==========================================
 
   const stationInput =
     document.createElement("input");
 
-
-  stationInput.type =
-    "hidden";
-
-
-  stationInput.name =
-    "station";
+  stationInput.type = "hidden";
+  stationInput.name = "station";
+  stationInput.value = "MAIN";
 
 
-  stationInput.value =
-    "MAIN";
-
-
-  /* ===================================================
-     LOG TYPE
-     =================================================== */
+  // ==========================================
+  // LOG TYPE
+  // ==========================================
 
   const logTypeInput =
     document.createElement("input");
 
-
-  logTypeInput.type =
-    "hidden";
-
-
-  logTypeInput.name =
-    "logType";
+  logTypeInput.type = "hidden";
+  logTypeInput.name = "logType";
+  logTypeInput.value = "SCAN";
 
 
-  logTypeInput.value =
-    "SCAN";
+  // ==========================================
+  // ADD INPUTS
+  // ==========================================
+
+  form.appendChild(lrnInput);
+  form.appendChild(stationInput);
+  form.appendChild(logTypeInput);
 
 
-  /* ===================================================
-     ADD INPUTS
-     =================================================== */
+  // ==========================================
+  // SUBMIT
+  // ==========================================
 
-  form.appendChild(
-    lrnInput
-  );
-
-
-  form.appendChild(
-    stationInput
-  );
-
-
-  form.appendChild(
-    logTypeInput
-  );
-
-
-  /* ===================================================
-     SUBMIT FORM
-     =================================================== */
-
-  document.body.appendChild(
-    form
-  );
-
+  document.body.appendChild(form);
 
   form.submit();
-
-
-  /*
-   * Remove form after
-   * submission.
-   */
 
   form.remove();
 
 
-  /*
-   * Display complete QR
-   * and extracted LRN.
-   */
+  // ==========================================
+  // DISPLAY
+  // ==========================================
 
   showSuccess(
-    qrData
+    qrData,
+    lrn
   );
-
 }
 
 
@@ -709,86 +376,111 @@ function sendScan(
    SHOW SUCCESS
    ===================================================== */
 
-function showSuccess(
-  lrn,
-  qrData
-) {
-
-
-  /*
-   * Hide scanner.
-   */
+function showSuccess(qrData, lrn) {
 
   document.getElementById(
     "scannerSection"
-  ).style.display =
-    "none";
+  ).style.display = "none";
 
-
-  /*
-   * Hide error.
-   */
 
   document.getElementById(
     "errorSection"
-  ).classList.add(
-    "hidden"
-  );
+  ).classList.add("hidden");
 
-
-  /*
-   * Show success.
-   */
 
   document.getElementById(
     "successSection"
-  ).classList.remove(
-    "hidden"
-  );
+  ).classList.remove("hidden");
 
-
-  /*
-   * Display FULL QR DATA
-   *
-   * This is the complete
-   * information decoded from
-   * the QR code.
-   */
 
   document.getElementById(
     "studentInfo"
   ).innerHTML =
 
+    /*
+     * FULL QR DATA
+     */
 
     "<strong>FULL QR DATA:</strong>" +
 
-
     "<div class=\"qr-data\">" +
 
-    escapeHtml(
-      qrData
-    ) +
+    escapeHtml(qrData) +
 
     "</div>" +
 
 
-    "<br>" +
+    "<br><br>" +
 
+
+    /*
+     * LRN
+     */
 
     "<strong>LRN SENT TO LOG:</strong>" +
 
-
     "<div class=\"lrn-data\">" +
 
-    escapeHtml(
-      lrn
-    ) +
+    escapeHtml(lrn) +
 
     "</div>" +
 
 
     "<br>" +
 
+    "The LRN has been submitted to the logging system.";
+
+}function showSuccess(qrData, lrn) {
+
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "none";
+
+
+  document.getElementById(
+    "errorSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "successSection"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "studentInfo"
+  ).innerHTML =
+
+    /*
+     * FULL QR DATA
+     */
+
+    "<strong>FULL QR DATA:</strong>" +
+
+    "<div class=\"qr-data\">" +
+
+    escapeHtml(qrData) +
+
+    "</div>" +
+
+
+    "<br><br>" +
+
+
+    /*
+     * LRN
+     */
+
+    "<strong>LRN SENT TO LOG:</strong>" +
+
+    "<div class=\"lrn-data\">" +
+
+    escapeHtml(lrn) +
+
+    "</div>" +
+
+
+    "<br>" +
 
     "The LRN has been submitted to the logging system.";
 
