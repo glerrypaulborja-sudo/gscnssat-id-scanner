@@ -199,7 +199,7 @@
    ===================================================== */
 
 const APPS_SCRIPT_URL =
-  "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+  "https://script.google.com/macros/s/AKfycbwlMNlWYwhdsaYGAzufP8kjawcZ9Cqg0RWI2Hf3TfyNqkx8O7q6cv56p76F7pt8fv7q/exec";
 
 
 /* =====================================================
