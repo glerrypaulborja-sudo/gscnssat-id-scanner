@@ -5,8 +5,9 @@
 
   <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1">
 
   <title>GSCNSSAT ID Logging System</title>
 
@@ -37,14 +38,12 @@
     h1 {
       text-align: center;
       margin-bottom: 5px;
-      font-size: 38px;
     }
 
     .subtitle {
       text-align: center;
       color: #666;
       margin-bottom: 25px;
-      font-size: 20px;
     }
 
     .scanner-card {
@@ -78,6 +77,7 @@
     .info {
       text-align: center;
       font-size: 20px;
+      line-height: 1.7;
       margin-top: 20px;
     }
 
@@ -122,8 +122,7 @@
 
     <div id="scannerSection">
 
-      <div id="status"
-           class="status">
+      <div id="status" class="status">
         READY TO SCAN
       </div>
 
@@ -134,15 +133,13 @@
 
     <!-- SUCCESS -->
 
-    <div id="successSection"
-         class="hidden">
+    <div id="successSection" class="hidden">
 
       <div class="status success">
         ✓ SCAN LOGGED
       </div>
 
-      <div id="studentInfo"
-           class="info">
+      <div id="studentInfo" class="info">
       </div>
 
       <div class="center">
@@ -162,15 +159,13 @@
 
     <!-- ERROR -->
 
-    <div id="errorSection"
-         class="hidden">
+    <div id="errorSection" class="hidden">
 
       <div class="status error">
         ✕ ERROR
       </div>
 
-      <div id="errorMessage"
-           class="info">
+      <div id="errorMessage" class="info">
       </div>
 
       <div class="center">
@@ -194,8 +189,9 @@
 
 <script>
 
+
 /* =====================================================
-   APPS SCRIPT BACKEND
+   APPS SCRIPT URL
    ===================================================== */
 
 const APPS_SCRIPT_URL =
@@ -203,10 +199,11 @@ const APPS_SCRIPT_URL =
 
 
 /* =====================================================
-   SCANNER
+   SCANNER VARIABLES
    ===================================================== */
 
 let scanner = null;
+
 let scanning = false;
 
 
@@ -216,36 +213,49 @@ let scanning = false;
 
 function startScanner() {
 
-  document.getElementById("scannerSection")
-    .style.display = "block";
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "block";
 
-  document.getElementById("successSection")
-    .classList.add("hidden");
 
-  document.getElementById("errorSection")
-    .classList.add("hidden");
+  document.getElementById(
+    "successSection"
+  ).classList.add("hidden");
 
-  document.getElementById("status")
-    .innerText = "STARTING CAMERA...";
+
+  document.getElementById(
+    "errorSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "status"
+  ).innerText = "STARTING CAMERA...";
 
 
   if (scanner) {
 
     try {
+
       scanner.clear();
+
     } catch (e) {}
 
   }
 
 
-  scanner = new Html5Qrcode("reader");
+  scanner =
+    new Html5Qrcode("reader");
 
 
   Html5Qrcode.getCameras()
 
     .then(function(devices) {
 
-      if (!devices || devices.length === 0) {
+      if (
+        !devices ||
+        devices.length === 0
+      ) {
 
         showError(
           "No camera was detected."
@@ -258,11 +268,10 @@ function startScanner() {
 
       /*
        * Use the first available camera.
-       * On the MacBook this should normally
-       * be the built-in FaceTime camera.
        */
 
-      const cameraId = devices[0].id;
+      const cameraId =
+        devices[0].id;
 
 
       scanner.start(
@@ -278,9 +287,11 @@ function startScanner() {
           }
         },
 
-        onScanSuccess,
+        handleQRCode,
 
-        onScanFailure
+        function(error) {
+          // Ignore normal scanning failures
+        }
 
       )
 
@@ -288,8 +299,10 @@ function startScanner() {
 
         scanning = true;
 
-        document.getElementById("status")
-          .innerText = "READY TO SCAN";
+        document.getElementById(
+          "status"
+        ).innerText =
+          "READY TO SCAN";
 
       })
 
@@ -298,8 +311,7 @@ function startScanner() {
         console.error(error);
 
         showError(
-          "Camera detected, but the browser could not start it. " +
-          "Please allow camera access."
+          "Camera detected, but the browser could not start it."
         );
 
       });
@@ -311,8 +323,7 @@ function startScanner() {
       console.error(error);
 
       showError(
-        "Unable to access the camera. " +
-        "Please check your browser camera permission."
+        "Unable to access the camera."
       );
 
     });
@@ -321,54 +332,81 @@ function startScanner() {
 
 
 /* =====================================================
-   QR SUCCESS
+   QR CODE HANDLER
    ===================================================== */
 
-function onScanSuccess(decodedText) {
+function handleQRCode(decodedText) {
 
   if (!scanning) {
+
     return;
+
   }
+
 
   scanning = false;
 
 
   /*
-   * QR contains CSV data:
+   * The QR contains:
    *
-   * 131000000000,HEZZEIL MAE A. BAGCAL,May 31, 2013.
+   * 131000000000,
+   * HEZZEIL MAE A. BAGCAL,
+   * May 31,
+   * 2013.
    *
-   * We only need the first field:
-   *
-   * 131000000000
+   * We only need the FIRST field.
    */
+
 
   const qrData =
     String(decodedText).trim();
 
 
+  console.log(
+    "FULL QR:",
+    qrData
+  );
+
+
+  /*
+   * Split CSV.
+   */
+
   const fields =
     qrData.split(",");
 
 
+  /*
+   * First field = LRN
+   */
+
   const lrn =
-    String(fields[0] || "").trim();
+    String(
+      fields[0] || ""
+    ).trim();
 
 
-  console.log("Full QR:", qrData);
-
-  console.log("Extracted LRN:", lrn);
+  console.log(
+    "EXTRACTED LRN:",
+    lrn
+  );
 
 
   /*
-   * Make sure the extracted value
-   * looks like an LRN.
+   * Validate LRN.
    */
 
-  if (!/^\d{12}$/.test(lrn)) {
+  if (
+    !/^\d{12}$/.test(lrn)
+  ) {
 
     showError(
-      "Invalid QR code. The first field must contain a 12-digit LRN."
+      "Invalid QR code.\n\n" +
+      "Extracted value:\n" +
+      lrn +
+      "\n\n" +
+      "Expected a 12-digit LRN."
     );
 
     return;
@@ -376,14 +414,26 @@ function onScanSuccess(decodedText) {
   }
 
 
+  /*
+   * Stop camera.
+   */
+
   try {
+
     scanner.stop();
+
   } catch (e) {}
 
 
-  document.getElementById("status")
-    .innerText = "LOGGING...";
+  document.getElementById(
+    "status"
+  ).innerText =
+    "LOGGING...";
 
+
+  /*
+   * Send LRN to Apps Script.
+   */
 
   sendScan(lrn);
 
@@ -391,79 +441,140 @@ function onScanSuccess(decodedText) {
 
 
 /* =====================================================
-   SEND SCAN TO APPS SCRIPT
+   SEND SCAN
    ===================================================== */
 
 function sendScan(lrn) {
 
   /*
-   * We use a normal HTML form POST.
+   * Create hidden form.
    *
-   * This avoids browser CORS problems when
-   * communicating with Google Apps Script.
+   * This avoids CORS problems.
    */
 
   const form =
     document.createElement("form");
 
+
   form.method = "POST";
+
 
   form.action =
     APPS_SCRIPT_URL;
+
 
   form.target =
     "hiddenFrame";
 
 
+  /*
+   * LRN
+   */
+
   const lrnInput =
     document.createElement("input");
 
-  lrnInput.type = "hidden";
 
-  lrnInput.name = "lrn";
+  lrnInput.type =
+    "hidden";
 
-  lrnInput.value = lrn;
 
+  lrnInput.name =
+    "lrn";
+
+
+  lrnInput.value =
+    lrn;
+
+
+  /*
+   * Station
+   */
 
   const stationInput =
     document.createElement("input");
 
-  stationInput.type = "hidden";
 
-  stationInput.name = "station";
+  stationInput.type =
+    "hidden";
 
-  stationInput.value = "MAIN";
 
+  stationInput.name =
+    "station";
+
+
+  stationInput.value =
+    "MAIN";
+
+
+  /*
+   * Log type
+   */
 
   const logTypeInput =
     document.createElement("input");
 
-  logTypeInput.type = "hidden";
 
-  logTypeInput.name = "logType";
-
-  logTypeInput.value = "SCAN";
+  logTypeInput.type =
+    "hidden";
 
 
-  form.appendChild(lrnInput);
-
-  form.appendChild(stationInput);
-
-  form.appendChild(logTypeInput);
+  logTypeInput.name =
+    "logType";
 
 
-  document.body.appendChild(form);
+  logTypeInput.value =
+    "SCAN";
 
+
+  /*
+   * Add inputs.
+   */
+
+  form.appendChild(
+    lrnInput
+  );
+
+
+  form.appendChild(
+    stationInput
+  );
+
+
+  form.appendChild(
+    logTypeInput
+  );
+
+
+  /*
+   * Add form to page.
+   */
+
+  document.body.appendChild(
+    form
+  );
+
+
+  /*
+   * Submit.
+   */
 
   form.submit();
 
+
+  /*
+   * Remove form.
+   */
 
   form.remove();
 
 
   /*
-   * We display success after sending
-   * the request to Apps Script.
+   * Show result.
+   *
+   * We will improve this later
+   * to wait for Apps Script's
+   * actual response.
    */
 
   showSuccess(lrn);
@@ -477,22 +588,31 @@ function sendScan(lrn) {
 
 function showSuccess(lrn) {
 
-  document.getElementById("scannerSection")
-    .style.display = "none";
-
-  document.getElementById("errorSection")
-    .classList.add("hidden");
-
-  document.getElementById("successSection")
-    .classList.remove("hidden");
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "none";
 
 
-  document.getElementById("studentInfo")
-    .innerHTML =
-      "<strong>LRN:</strong> " +
-      escapeHtml(lrn) +
-      "<br><br>" +
-      "The scan has been sent to the logging system.";
+  document.getElementById(
+    "errorSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "successSection"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "studentInfo"
+  ).innerHTML =
+
+    "<strong>LRN:</strong> " +
+    escapeHtml(lrn) +
+
+    "<br><br>" +
+
+    "The scan has been sent to the logging system.";
 
 }
 
@@ -509,39 +629,39 @@ function showError(message) {
   try {
 
     if (scanner) {
+
       scanner.stop();
+
     }
 
   } catch (e) {}
 
 
-  document.getElementById("scannerSection")
-    .style.display = "none";
-
-  document.getElementById("successSection")
-    .classList.add("hidden");
-
-  document.getElementById("errorSection")
-    .classList.remove("hidden");
+  document.getElementById(
+    "scannerSection"
+  ).style.display = "none";
 
 
-  document.getElementById("errorMessage")
-    .innerText = message;
+  document.getElementById(
+    "successSection"
+  ).classList.add("hidden");
+
+
+  document.getElementById(
+    "errorSection"
+  ).classList.remove("hidden");
+
+
+  document.getElementById(
+    "errorMessage"
+  ).innerText =
+    message;
 
 }
 
 
 /* =====================================================
-   SCAN FAILURE
-   ===================================================== */
-
-function onScanFailure(error) {
-  // Intentionally empty.
-}
-
-
-/* =====================================================
-   HTML ESCAPE
+   ESCAPE HTML
    ===================================================== */
 
 function escapeHtml(text) {
@@ -549,7 +669,10 @@ function escapeHtml(text) {
   const div =
     document.createElement("div");
 
-  div.textContent = text;
+
+  div.textContent =
+    text;
+
 
   return div.innerHTML;
 
@@ -557,20 +680,23 @@ function escapeHtml(text) {
 
 
 /* =====================================================
-   START
+   START WHEN PAGE LOADS
    ===================================================== */
 
-window.onload = function() {
+window.onload =
+  function() {
 
-  startScanner();
+    startScanner();
 
-};
+  };
+
 
 </script>
 
 
 <!--
-  Hidden target for the Apps Script POST.
+  Hidden target used by the
+  Apps Script POST request.
 -->
 
 <iframe
