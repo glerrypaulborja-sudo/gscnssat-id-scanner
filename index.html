@@ -336,109 +336,38 @@ function startScanner() {
    ===================================================== */
 
 function handleQRCode(decodedText) {
-
-  if (!scanning) {
-
-    return;
-
-  }
-
+  if (!scanning) return;
 
   scanning = false;
 
+  // KEEP THE ENTIRE QR DATA
+  const qrData = String(decodedText).trim();
 
-  /*
-   * The QR contains:
-   *
-   * 131000000000,
-   * HEZZEIL MAE A. BAGCAL,
-   * May 31,
-   * 2013.
-   *
-   * We only need the FIRST field.
-   */
+  console.log("FULL QR DATA:", qrData);
 
+  // ONLY EXTRACT THE FIRST CSV FIELD FOR THE LRN
+  const lrn = qrData.split(",")[0].trim();
 
-  const qrData =
-    String(decodedText).trim();
+  console.log("LRN TO SEND:", lrn);
 
-
-  console.log(
-    "FULL QR:",
-    qrData
-  );
-
-
-  /*
-   * Split CSV.
-   */
-
-  const fields =
-    qrData.split(",");
-
-
-  /*
-   * First field = LRN
-   */
-
-  const lrn =
-    String(
-      fields[0] || ""
-    ).trim();
-
-
-  console.log(
-    "EXTRACTED LRN:",
-    lrn
-  );
-
-
-  /*
-   * Validate LRN.
-   */
-
-  if (
-    !/^\d{12}$/.test(lrn)
-  ) {
-
+  if (!/^\d{12}$/.test(lrn)) {
     showError(
       "Invalid QR code.\n\n" +
-      "Extracted value:\n" +
-      lrn +
+      "Full QR data:\n" +
+      qrData +
       "\n\n" +
-      "Expected a 12-digit LRN."
+      "Extracted LRN:\n" +
+      lrn
     );
-
     return;
-
   }
 
-
-  /*
-   * Stop camera.
-   */
-
   try {
-
     scanner.stop();
-
   } catch (e) {}
 
-
-  document.getElementById(
-    "status"
-  ).innerText =
-    "LOGGING...";
-
-
-  /*
-   * Send LRN to Apps Script.
-   */
-
-  sendScan(lrn);
-
+  sendScan(lrn, qrData);
 }
-
 
 /* =====================================================
    SEND SCAN
